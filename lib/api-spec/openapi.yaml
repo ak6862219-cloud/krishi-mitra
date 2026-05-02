@@ -1,0 +1,586 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: AgriSmart API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: openai
+    description: AI chat operations
+  - name: disease-detection
+    description: Crop disease detection
+  - name: weather
+    description: Weather advisory
+  - name: market-prices
+    description: Crop market prices
+  - name: government-schemes
+    description: Government agricultural schemes
+  - name: dashboard
+    description: Dashboard summary
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /openai/conversations:
+    get:
+      operationId: listConversations
+      tags: [openai]
+      summary: List conversations
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+    post:
+      operationId: createConversation
+      tags: [openai]
+      summary: Create a new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConversationBody"
+      responses:
+        "201":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+
+  /openai/conversations/{id}:
+    get:
+      operationId: getConversation
+      tags: [openai]
+      summary: Get a conversation with messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationWithMessages"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteConversation
+      tags: [openai]
+      summary: Delete a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /openai/conversations/{id}/messages:
+    post:
+      operationId: sendMessage
+      tags: [openai]
+      summary: Send a text message (streaming SSE)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendMessageBody"
+      responses:
+        "200":
+          description: SSE stream
+
+  /disease-detection/analyze:
+    post:
+      operationId: analyzeCropDisease
+      tags: [disease-detection]
+      summary: Analyze crop image for disease detection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeCropDiseaseBody"
+      responses:
+        "200":
+          description: Disease analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DiseaseAnalysisResult"
+
+  /weather/advisory:
+    get:
+      operationId: getWeatherAdvisory
+      tags: [weather]
+      summary: Get weather advisory for a location
+      parameters:
+        - name: city
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: lat
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: lon
+          in: query
+          required: false
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Weather advisory
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeatherAdvisory"
+
+  /market-prices:
+    get:
+      operationId: listMarketPrices
+      tags: [market-prices]
+      summary: List crop market prices
+      parameters:
+        - name: crop
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of market prices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MarketPrice"
+
+  /market-prices/summary:
+    get:
+      operationId: getMarketPriceSummary
+      tags: [market-prices]
+      summary: Get market price summary and trends
+      responses:
+        "200":
+          description: Market price summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MarketPriceSummary"
+
+  /government-schemes:
+    get:
+      operationId: listGovernmentSchemes
+      tags: [government-schemes]
+      summary: List government agricultural schemes
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of schemes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GovernmentScheme"
+
+  /government-schemes/{id}:
+    get:
+      operationId: getGovernmentScheme
+      tags: [government-schemes]
+      summary: Get a single government scheme
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Scheme details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GovernmentScheme"
+        "404":
+          description: Not found
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard overview summary
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - title
+        - createdAt
+        - updatedAt
+
+    ConversationWithMessages:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+      required:
+        - id
+        - title
+        - createdAt
+        - updatedAt
+        - messages
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - conversationId
+        - role
+        - content
+        - createdAt
+
+    CreateConversationBody:
+      type: object
+      properties:
+        title:
+          type: string
+      required:
+        - title
+
+    SendMessageBody:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
+
+    AnalyzeCropDiseaseBody:
+      type: object
+      properties:
+        imageBase64:
+          type: string
+        cropType:
+          type: ["string", "null"]
+      required:
+        - imageBase64
+
+    DiseaseAnalysisResult:
+      type: object
+      properties:
+        diseaseName:
+          type: string
+        confidence:
+          type: number
+        severity:
+          type: string
+        description:
+          type: string
+        symptoms:
+          type: array
+          items:
+            type: string
+        treatment:
+          type: array
+          items:
+            type: string
+        prevention:
+          type: array
+          items:
+            type: string
+        affectedCrop:
+          type: string
+      required:
+        - diseaseName
+        - confidence
+        - severity
+        - description
+        - symptoms
+        - treatment
+        - prevention
+        - affectedCrop
+
+    WeatherAdvisory:
+      type: object
+      properties:
+        location:
+          type: string
+        temperature:
+          type: number
+        humidity:
+          type: number
+        windSpeed:
+          type: number
+        condition:
+          type: string
+        description:
+          type: string
+        advisories:
+          type: array
+          items:
+            type: string
+        farmingTips:
+          type: array
+          items:
+            type: string
+        forecast:
+          type: array
+          items:
+            $ref: "#/components/schemas/ForecastDay"
+      required:
+        - location
+        - temperature
+        - humidity
+        - windSpeed
+        - condition
+        - description
+        - advisories
+        - farmingTips
+        - forecast
+
+    ForecastDay:
+      type: object
+      properties:
+        date:
+          type: string
+        tempMin:
+          type: number
+        tempMax:
+          type: number
+        condition:
+          type: string
+        precipitation:
+          type: number
+      required:
+        - date
+        - tempMin
+        - tempMax
+        - condition
+        - precipitation
+
+    MarketPrice:
+      type: object
+      properties:
+        id:
+          type: integer
+        cropName:
+          type: string
+        variety:
+          type: string
+        state:
+          type: string
+        market:
+          type: string
+        minPrice:
+          type: number
+        maxPrice:
+          type: number
+        modalPrice:
+          type: number
+        unit:
+          type: string
+        date:
+          type: string
+        trend:
+          type: string
+        changePercent:
+          type: number
+      required:
+        - id
+        - cropName
+        - variety
+        - state
+        - market
+        - minPrice
+        - maxPrice
+        - modalPrice
+        - unit
+        - date
+        - trend
+        - changePercent
+
+    MarketPriceSummary:
+      type: object
+      properties:
+        totalCrops:
+          type: integer
+        avgPriceChange:
+          type: number
+        topGainers:
+          type: array
+          items:
+            $ref: "#/components/schemas/MarketPrice"
+        topLosers:
+          type: array
+          items:
+            $ref: "#/components/schemas/MarketPrice"
+        lastUpdated:
+          type: string
+      required:
+        - totalCrops
+        - avgPriceChange
+        - topGainers
+        - topLosers
+        - lastUpdated
+
+    GovernmentScheme:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        benefits:
+          type: string
+        eligibility:
+          type: string
+        applicationProcess:
+          type: string
+        deadline:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        ministry:
+          type: string
+        website:
+          type: ["string", "null"]
+        helpline:
+          type: ["string", "null"]
+      required:
+        - id
+        - name
+        - category
+        - description
+        - benefits
+        - eligibility
+        - applicationProcess
+        - isActive
+        - ministry
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalSchemes:
+          type: integer
+        activeSchemes:
+          type: integer
+        cropCount:
+          type: integer
+        recentDetections:
+          type: integer
+        weatherAlert:
+          type: boolean
+        marketHighlight:
+          type: string
+      required:
+        - totalSchemes
+        - activeSchemes
+        - cropCount
+        - recentDetections
+        - weatherAlert
+        - marketHighlight

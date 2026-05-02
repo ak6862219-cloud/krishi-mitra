@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "xZjyeaJw-X7xnuSot0crK"
+uri = "file://krishi-mitra.tar.gz"
+type = "unspecified"
+title = "Krishi Mitra — Full Source Code"
