@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { apiUrl } from "@/lib/api";
 import { useListConversations, useCreateConversation, useGetConversation, getListConversationsQueryKey } from "@workspace/api-client-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,7 +78,7 @@ export default function Chatbot() {
     setIsStreaming(true);
 
     try {
-      const response = await fetch(`/api/openai/conversations/${conversationId}/messages`, {
+      const response = await fetch(apiUrl(`/api/openai/conversations/${conversationId}/messages`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: text })
@@ -134,7 +135,7 @@ export default function Chatbot() {
       await sendMessage(text, activeId);
     } else {
       // Auto-create conversation then send
-      const res = await fetch("/api/openai/conversations", {
+      const res = await fetch(apiUrl("/api/openai/conversations"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title: text.slice(0, 40) })

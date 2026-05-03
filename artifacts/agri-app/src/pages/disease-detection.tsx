@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { apiUrl } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,7 +61,7 @@ export default function DiseaseDetection() {
     setError(null);
 
     try {
-      const response = await fetch("/api/disease-detection/analyze", {
+      const response = await fetch(apiUrl("/api/disease-detection/analyze"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ cropType: cropType || undefined }),

@@ -14,7 +14,20 @@ import MarketPrices from "@/pages/market-prices";
 import Chatbot from "@/pages/chatbot";
 import Schemes from "@/pages/schemes";
 
-const queryClient = new QueryClient();
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      queryFn: async ({ queryKey }) => {
+        const path = queryKey[0] as string;
+        const res = await fetch(`${API_BASE}${path}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      }
+    }
+  }
+});
 
 function Router() {
   return (
