@@ -1,12 +1,12 @@
 # 🌾 Krishi Mitra — Smart Farming Assistant
 
-**Krishi Mitra** ek smart farming assistant hai jo Indian farmers ke liye banaya gaya hai. Yeh app mausam, mandi bhav, sarkari yojanaein, fasal rog pahchaan aur AI chatbot jaise features provide karta hai — Hindi mein.
+**Krishi Mitra** is a full-stack smart farming assistant built for Indian farmers. It provides real-time-style weather advisories, mandi (market) prices, government scheme information, AI-powered crop disease detection, and an intelligent Hindi chatbot — all in one place.
 
 ---
 
 ## 🔗 Live Demo
 
-👉 **https://krishi-mitra-sigma-nine.vercel.app**
+👉 **[https://krishi-mitra-sigma-nine.vercel.app](https://krishi-mitra-sigma-nine.vercel.app)**
 
 ---
 
@@ -14,23 +14,33 @@
 
 | Feature | Description |
 |---|---|
-| 📊 **Dashboard** | Time-based greeting, mausam, mandi bhav, jaldi karyaein |
-| 🌤️ **Mausam Jaankari** | 6 sheher ka mausam, 5-din forecast, farming tips |
-| 📈 **Mandi Bhav** | 15 fasalon ke live-jaise bhav, gainers/losers, state filter |
-| 🏛️ **Sarkari Yojanaein** | 8 yojanaein — PM-KISAN, PMFBY, KCC, Kusum aur aur bhi |
-| 🔬 **Fasal Rog Pahchaan** | Photo upload karo, AI se bimari ki jaankari pao |
-| 🤖 **AI Chatbot** | Hindi mein sawaal poochho — gehun, dhan, keet, khaad, yojana |
+| 📊 **Dashboard** | Personalized greeting, live weather snapshot, top market prices, quick actions |
+| 🌤️ **Weather Advisory** | City-based weather with 5-day forecast, farming tips & alerts |
+| 📈 **Market Prices (Mandi)** | Prices for 15+ crops across Indian states with trend indicators |
+| 🏛️ **Government Schemes** | 8 major schemes — PM-KISAN, PMFBY, KCC, PM Kusum & more with full details |
+| 🔬 **Crop Disease Detection** | Upload a photo, get AI-powered disease diagnosis with treatment steps |
+| 🤖 **AI Chatbot** | Hindi-language assistant for crop, weather, fertilizer & scheme queries |
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** React 18 + Vite + TypeScript
-- **UI:** Tailwind CSS + shadcn/ui
-- **Backend:** Express 5 + Node.js
-- **Database:** PostgreSQL + Drizzle ORM
-- **Monorepo:** pnpm Workspaces
-- **Deploy:** Vercel (frontend) — backend Replit pe
+**Frontend**
+- React 18 + Vite + TypeScript
+- Tailwind CSS + shadcn/ui
+- TanStack Query (React Query)
+- Wouter (routing)
+
+**Backend**
+- Express 5 + Node.js
+- PostgreSQL + Drizzle ORM
+- Pino (logging)
+- OpenAPI + Zod (validation)
+
+**Infrastructure**
+- pnpm Workspaces (monorepo)
+- Vercel (frontend deployment)
+- esbuild (backend bundler)
 
 ---
 
@@ -39,168 +49,200 @@
 ```
 krishi-mitra/
 ├── artifacts/
-│   ├── agri-app/          # React + Vite Frontend
+│   ├── agri-app/               # React + Vite frontend
 │   │   └── src/
-│   │       ├── pages/     # Dashboard, Weather, Market, Schemes, Chatbot, Disease
-│   │       ├── components/ # Layout, UI components
-│   │       └── lib/       # Utilities
-│   └── api-server/        # Express 5 Backend
+│   │       ├── pages/          # Dashboard, Weather, Market, Schemes, Chatbot, Disease
+│   │       ├── components/     # Layout, sidebar, UI components
+│   │       └── lib/            # Utilities, API helpers
+│   └── api-server/             # Express 5 REST API
 │       └── src/
-│           ├── routes/    # API routes
-│           └── lib/       # Logger, DB
+│           ├── routes/         # API route handlers
+│           └── lib/            # Logger, DB connection
 ├── lib/
-│   ├── db/                # Drizzle schema + migrations
-│   ├── api-spec/          # OpenAPI spec
-│   └── api-zod/           # Zod schemas
-└── pnpm-workspace.yaml
+│   ├── db/                     # Drizzle schema & migrations
+│   ├── api-spec/               # OpenAPI specification
+│   ├── api-zod/                # Generated Zod schemas
+│   └── api-client-react/       # Generated React Query hooks
+├── scripts/                    # Shared utility scripts
+├── pnpm-workspace.yaml
+└── README.md
 ```
 
 ---
 
-## 🚀 Local Setup
+## 🚀 Getting Started
 
-### 1. Clone karo
+### Prerequisites
+
+- Node.js 20+
+- pnpm (`npm install -g pnpm`)
+- PostgreSQL database
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/ak6862219-cloud/krishi-mitra.git
 cd krishi-mitra
 ```
 
-### 2. Dependencies install karo
+### 2. Install Dependencies
 
 ```bash
-npm install -g pnpm
 pnpm install
 ```
 
-### 3. Environment variables set karo
+### 3. Configure Environment Variables
 
-Root mein `.env` file banao:
+Create a `.env` file in the root directory:
 
 ```env
 DATABASE_URL=postgresql://user:password@localhost:5432/krishimitra
-SESSION_SECRET=apna-koi-bhi-secret-string
+SESSION_SECRET=your-random-secret-string
 ```
 
-### 4. Database setup karo
+### 4. Set Up the Database
 
 ```bash
 pnpm --filter @workspace/db run push
 ```
 
-### 5. App chalao
+### 5. Start the Development Servers
 
 ```bash
-# Frontend (Terminal 1)
+# Terminal 1 — Frontend
 PORT=3000 BASE_PATH=/ pnpm --filter @workspace/agri-app run dev
 
-# Backend (Terminal 2)
+# Terminal 2 — Backend API
 PORT=8080 pnpm --filter @workspace/api-server run dev
 ```
 
-Frontend: http://localhost:3000
-Backend: http://localhost:8080
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:3000 |
+| API Server | http://localhost:8080/api |
 
 ---
 
-## ☁️ Deployment
+## ☁️ Deployment Guide
 
-### Frontend — Vercel
+### Frontend → Vercel
 
-1. vercel.com pe login karein → GitHub repo import karein
-2. Root Directory: `artifacts/agri-app`
-3. Build Command: `npm install -g pnpm && pnpm install --no-frozen-lockfile && pnpm run build`
-4. Output Directory: `dist/public`
-5. Environment Variable: `VITE_API_BASE_URL` = aapka backend URL
+1. Go to [vercel.com](https://vercel.com) and import the GitHub repository
+2. Set **Root Directory** to `artifacts/agri-app`
+3. Set **Build Command** to:
+   ```
+   npm install -g pnpm && pnpm install --no-frozen-lockfile && pnpm run build
+   ```
+4. Set **Output Directory** to `dist/public`
+5. Add environment variable: `VITE_API_BASE_URL` = your backend URL
 
-### Backend — Render / Railway
+### Backend → Render / Railway
 
-1. Repo connect karein
-2. Root Directory: workspace root
-3. Build: `npm install -g pnpm && pnpm install && pnpm --filter @workspace/api-server run build`
-4. Start: `node --enable-source-maps ./artifacts/api-server/dist/index.mjs`
-5. Env vars: `DATABASE_URL`, `SESSION_SECRET`, `NODE_ENV=production`
+1. Connect your GitHub repository
+2. Set **Build Command**:
+   ```
+   npm install -g pnpm && pnpm install && pnpm --filter @workspace/api-server run build
+   ```
+3. Set **Start Command**:
+   ```
+   node --enable-source-maps ./artifacts/api-server/dist/index.mjs
+   ```
+4. Add environment variables:
+   ```
+   DATABASE_URL=your_postgres_url
+   SESSION_SECRET=your_secret
+   NODE_ENV=production
+   ```
 
-### Database — Supabase (Free)
+### Database → Supabase (Free)
 
-1. supabase.com pe project banao
-2. Settings → Database → URI copy karo
-3. Yahi aapka `DATABASE_URL` hai
+1. Create a project at [supabase.com](https://supabase.com)
+2. Go to **Settings → Database → URI**
+3. Copy the connection string — use it as your `DATABASE_URL`
 
 ---
 
-## 📱 Pages
+## 📱 Pages Overview
 
 ### Dashboard
-- Time-based greeting (Suprabhat / Namaskar / Shubh Saayin)
-- Live mausam card (Delhi)
-- Aaj ke top mandi bhav
-- Jaldi karyaein shortcuts
-- Aaj ka farming tip
+- Time-based greeting (Good Morning / Afternoon / Evening)
+- Current weather card for Delhi
+- Today's top mandi prices with trend badges
+- Quick action shortcuts to all features
+- Daily farming tip
 
-### Mausam Jaankari
-- Sheher khojo (Delhi, Mumbai, Lucknow, Pune, Bangalore, Kolkata)
-- Temperature, humidity, wind speed
-- Mausam chetavniyaan
-- Kheti suzhav
-- 5-din ka forecast
+### Weather Advisory
+- Search any city (Delhi, Mumbai, Lucknow, Pune, Bengaluru, Kolkata)
+- Temperature, humidity, and wind speed
+- Active weather alerts
+- Farming tips tailored to the weather
+- 5-day forecast with conditions
 
-### Mandi Bhav
-- 15 fasalon ke bhav (Gehun, Dhan, Tamatar, Pyaaz, Aalu aur aur)
-- Top gainers & losers
-- Crop aur state se filter
-- Modal, min, max bhav
+### Market Prices (Mandi Bhav)
+- Prices for 15 crops across major Indian markets
+- Top gainers and losers overview
+- Filter by crop name or state
+- Min, max, and modal price per quintal
 
-### Sarkari Yojanaein
+### Government Schemes
+- 8 major agricultural schemes with full details
 - PM-KISAN, PMFBY, KCC, PM Kusum, PKVY, E-NAM, Soil Health Card, RKVY
-- Puri jaankari, eligibility, application process
-- Helpline number aur sarkari portal link
+- Eligibility criteria, benefits, application steps
+- Official portal links and helpline numbers
 
-### Fasal Rog Pahchaan
-- Photo upload (drag & drop)
-- Fasal ka naam daalo
-- AI se bimari ki pahchaan
-- Treatment steps, symptoms, prevention
+### Crop Disease Detection
+- Drag & drop or click to upload a crop photo
+- Optionally enter crop name for better accuracy
+- AI returns disease name, confidence score, severity
+- Numbered treatment steps, symptoms, and prevention tips
 
 ### AI Chatbot (Krishi Mitra AI)
-- Hindi mein sawaal poochho
-- Gehun, dhan, keet, khaad, yojana, mausam — kuch bhi
-- SSE streaming replies
-- Conversation history
+- Hindi-language conversational assistant
+- Covers: wheat, rice, pests, fertilizers, schemes, weather
+- Streaming SSE responses for real-time feel
+- Conversation history with multiple sessions
 
 ---
 
-## 🌾 Supported Cities (Weather)
+## 🌾 Supported Weather Cities
 
 Delhi · Mumbai · Lucknow · Pune · Bengaluru · Kolkata
 
+> For any other city, the app will display Delhi's weather data as a fallback.
+
 ---
 
-## 📞 Helpline Numbers
+## 📞 Government Helpline Numbers
 
-| Yojana | Helpline |
+| Scheme | Helpline |
 |---|---|
 | PM-KISAN | 155261 |
-| Fasal Bima | 14447 |
+| Pradhan Mantri Fasal Bima | 14447 |
 | Kisan Credit Card | 1800-180-1111 |
-| PM Kusum | 1800-180-3333 |
+| PM Kusum Solar | 1800-180-3333 |
 | Krishi Vibhag | 1551 |
+| E-NAM Portal | 1800-270-0224 |
 
 ---
 
 ## 🤝 Contributing
 
-1. Fork karein
-2. Feature branch banao: `git checkout -b feature/naya-feature`
-3. Changes commit karein
-4. PR submit karein
+Contributions are welcome! Here's how to get started:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature-name`
+3. Make your changes and commit: `git commit -m "feat: add your feature"`
+4. Push to your branch: `git push origin feature/your-feature-name`
+5. Open a Pull Request
 
 ---
 
 ## 📄 License
 
-MIT License — Freely use, modify aur distribute karein.
+This project is licensed under the **MIT License** — free to use, modify, and distribute.
 
 ---
 
-**Krishi Mitra — Har kisan ka digital saathi** 🌱
+<div align="center">
+  <strong>Krishi Mitra — Every farmer's digital companion 🌱</strong>
+</div>
