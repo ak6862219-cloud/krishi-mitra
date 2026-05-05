@@ -61,16 +61,27 @@ export default function DiseaseDetection() {
     setError(null);
 
     try {
+      // Convert image to base64
+      const file = (document.getElementById("picture-upload") as HTMLInputElement)?.files?.[0];
+      if (!file) throw new Error("No image file selected");
+
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
       const response = await fetch(apiUrl("/api/disease-detection/analyze"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cropType: cropType || undefined }),
+        body: JSON.stringify({ imageBase64: base64.split(',')[1], cropType: cropType || undefined }),
       });
 
       if (!response.ok) throw new Error("Server error");
       const data = await response.json();
       setResult(data);
-    } catch {
+    } catch (err) {
       setError("Analysis fail hui. Dobara try karein.");
     } finally {
       setIsAnalyzing(false);
