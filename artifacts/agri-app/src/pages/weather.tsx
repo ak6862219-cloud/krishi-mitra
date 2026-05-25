@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CloudRain, Wind, Droplets, ThermometerSun, Search, AlertTriangle, Sprout, CalendarDays, CheckCircle2 } from "lucide-react";
+import { CloudRain, Wind, Droplets, ThermometerSun, Search, AlertTriangle, Sprout, CheckCircle2, Sun, CloudSnow } from "lucide-react";
 
 const CITY_DATA: Record<string, {
   location: string; temperature: number; condition: string; description: string;
@@ -26,7 +26,7 @@ const CITY_DATA: Record<string, {
     location: "Mumbai", temperature: 29, condition: "Umdaa Mausam", humidity: 82, windSpeed: 22,
     description: "Aaj umad ke saath halki baarish ho sakti hai. Khet ki nikasi ka dhyan rakhein.",
     advisories: ["Baarish se fasal ko bachaaein", "Khet mein paani jama na hone dein"],
-    farmingTips: ["Chawal ki ropai ke liye acha samay", "Khetон ki mitti jaanch karein", "Keet dawai dalein", "Khet ki bund banaaein"],
+    farmingTips: ["Chawal ki ropai ke liye acha samay", "Mitti jaanch karein", "Keet dawai dalein", "Khet ki bund banaaein"],
     forecast: [
       { date: "Aaj", tempMax: 29, tempMin: 24, condition: "Halki Baarish" },
       { date: "Kal", tempMax: 28, tempMin: 23, condition: "Tez Baarish" },
@@ -65,7 +65,7 @@ const CITY_DATA: Record<string, {
     location: "Kolkata", temperature: 32, condition: "Umdaa aur Garami", humidity: 78, windSpeed: 18,
     description: "Umad jayada hai. Chawal ki ropai ke liye mausam thik hai.",
     advisories: ["Tez hawa aa sakti hai — paudhe bandh karein", "Aandhi-baarish ki sambhavna"],
-    farmingTips: ["Dhan ki kheti ke liye acha samay", "Paan aur paan ke patte ka dhyan rakhein", "Keet se bachao karein", "Zamin ki namee jaanch karein"],
+    farmingTips: ["Dhan ki kheti ke liye acha samay", "Paan ke patte ka dhyan rakhein", "Keet se bachao karein", "Zamin ki namee jaanch karein"],
     forecast: [
       { date: "Aaj", tempMax: 32, tempMin: 25, condition: "Umadaa" },
       { date: "Kal", tempMax: 30, tempMin: 24, condition: "Baarish" },
@@ -89,15 +89,27 @@ const CITY_DATA: Record<string, {
   },
 };
 
-const DEFAULT_CITY = "lucknow";
+function getWeatherIcon(condition: string, size = "h-8 w-8") {
+  const c = condition.toLowerCase();
+  if (c.includes("baarish") || c.includes("tez")) return <CloudRain className={size} />;
+  if (c.includes("thand") || c.includes("snow")) return <CloudSnow className={size} />;
+  if (c.includes("baadal")) return <CloudRain className={size} />;
+  return <Sun className={size} />;
+}
+
+function getTempColor(temp: number) {
+  if (temp >= 38) return "from-red-600 to-orange-500";
+  if (temp >= 32) return "from-orange-500 to-amber-400";
+  if (temp >= 25) return "from-amber-400 to-yellow-400";
+  return "from-sky-500 to-blue-400";
+}
 
 function getWeatherData(city: string) {
   const key = city.toLowerCase().trim();
-  return CITY_DATA[key] ?? {
-    ...CITY_DATA[DEFAULT_CITY],
-    location: city.charAt(0).toUpperCase() + city.slice(1),
-  };
+  return CITY_DATA[key] ?? { ...CITY_DATA["lucknow"], location: city.charAt(0).toUpperCase() + city.slice(1) };
 }
+
+const POPULAR_CITIES = ["Delhi", "Mumbai", "Lucknow", "Pune", "Bengaluru", "Kolkata"];
 
 export default function Weather() {
   const [searchInput, setSearchInput] = useState("");
@@ -106,132 +118,155 @@ export default function Weather() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchInput.trim()) {
-      setCity(searchInput.trim());
-      setSearchInput("");
-    }
+    if (searchInput.trim()) { setCity(searchInput.trim()); setSearchInput(""); }
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="space-y-6 animate-in fade-in duration-500">
+
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight text-primary">Mausam Jaankari</h1>
-          <p className="text-lg text-muted-foreground mt-2">Aapke sheher ka mausam aur kheti ke suzhav.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground">🌤️ Mausam Jaankari</h1>
+          <p className="text-muted-foreground mt-1 font-medium">Aapke sheher ka mausam aur kheti ke suzhav</p>
         </div>
-        <form onSubmit={handleSearch} className="flex w-full md:w-auto gap-2">
-          <Input
-            placeholder="Sheher khojein... (Delhi, Mumbai...)"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="md:w-[260px]"
-          />
-          <Button type="submit" variant="secondary">
-            <Search className="h-4 w-4 mr-2" /> Khojein
-          </Button>
+        <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
+          <div className="relative flex-1 md:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Sheher likhein..." value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-9 bg-card border-border font-medium" />
+          </div>
+          <Button type="submit" className="font-bold shrink-0">Khojein</Button>
         </form>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="md:col-span-3 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground border-none shadow-md overflow-hidden relative">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <CloudRain className="h-48 w-48" />
+      {/* Popular Cities */}
+      <div className="flex flex-wrap gap-2">
+        {POPULAR_CITIES.map(c => (
+          <button key={c} onClick={() => setCity(c)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              city.toLowerCase() === c.toLowerCase()
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "bg-card border border-border text-muted-foreground hover:border-primary/40 hover:text-primary"
+            }`}>
+            {c}
+          </button>
+        ))}
+      </div>
+
+      {/* Main Weather Hero */}
+      <div className={`relative overflow-hidden rounded-2xl text-white shadow-xl bg-gradient-to-br ${getTempColor(weather.temperature)}`}>
+        <div className="absolute inset-0 opacity-10"
+          style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "20px 20px" }} />
+        <div className="absolute -right-4 -top-4 opacity-10 animate-float">
+          {weather.temperature >= 30 ? <Sun className="h-48 w-48" /> : <CloudRain className="h-48 w-48" />}
+        </div>
+
+        <div className="relative z-10 p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+          <div>
+            <p className="text-white/70 text-sm font-bold uppercase tracking-widest mb-2">📍 {weather.location}</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-8xl font-black tracking-tighter leading-none">{weather.temperature}°</span>
+              <span className="text-3xl font-medium text-white/70">C</span>
+            </div>
+            <p className="text-xl font-bold mt-2">{weather.condition}</p>
+            <p className="text-white/75 mt-1 text-sm max-w-sm leading-relaxed">{weather.description}</p>
           </div>
-          <CardContent className="p-8 relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div>
-              <h2 className="text-3xl font-bold">{weather.location}</h2>
-              <p className="text-primary-foreground/80 mt-1 text-lg">{weather.condition}</p>
-              <div className="mt-6 flex items-baseline gap-2">
-                <span className="text-7xl font-black tracking-tighter">{weather.temperature}°</span>
-                <span className="text-2xl font-medium text-primary-foreground/80">C</span>
+
+          <div className="grid grid-cols-3 gap-3 w-full md:w-auto">
+            {[
+              { icon: ThermometerSun, label: "Feels Like", value: `${weather.temperature + 2}°C` },
+              { icon: Droplets, label: "Namee", value: `${weather.humidity}%` },
+              { icon: Wind, label: "Hawa", value: `${weather.windSpeed} km/h` },
+            ].map((stat) => (
+              <div key={stat.label} className="flex flex-col items-center text-center bg-white/15 backdrop-blur-sm rounded-2xl p-4">
+                <stat.icon className="h-5 w-5 mb-1.5 text-white/80" />
+                <p className="text-lg font-black">{stat.value}</p>
+                <p className="text-[10px] text-white/65 font-semibold mt-0.5 uppercase tracking-wide">{stat.label}</p>
               </div>
-              <p className="text-primary-foreground/90 mt-2 max-w-md text-lg">{weather.description}</p>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Advisories + Tips */}
+      <div className="grid gap-5 md:grid-cols-3">
+        {/* Alerts */}
+        <Card className="border-none shadow-sm ring-1 ring-border overflow-hidden">
+          <div className="flex items-center gap-2.5 px-5 pt-5 pb-3 border-b border-border">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100">
+              <AlertTriangle className="h-4 w-4 text-amber-600" />
             </div>
-            <div className="grid grid-cols-2 gap-4 w-full md:w-auto bg-black/10 p-6 rounded-2xl backdrop-blur-sm">
-              <div className="flex items-center gap-3">
-                <div className="bg-primary-foreground/20 p-3 rounded-full"><ThermometerSun className="h-6 w-6" /></div>
-                <div>
-                  <p className="text-sm text-primary-foreground/70 font-medium">Feels Like</p>
-                  <p className="text-xl font-bold">{weather.temperature + 2}°C</p>
-                </div>
+            <h3 className="font-bold text-base text-foreground">Chetavniyaan</h3>
+            <span className="ml-auto text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">
+              {weather.advisories.length}
+            </span>
+          </div>
+          <CardContent className="p-4 space-y-2.5">
+            {weather.advisories.map((adv, i) => (
+              <div key={i} className="flex gap-2.5 items-start bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5">
+                <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0" />
+                <span className="text-sm font-medium text-amber-900">{adv}</span>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="bg-primary-foreground/20 p-3 rounded-full"><Droplets className="h-6 w-6" /></div>
-                <div>
-                  <p className="text-sm text-primary-foreground/70 font-medium">Namee</p>
-                  <p className="text-xl font-bold">{weather.humidity}%</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <div className="bg-primary-foreground/20 p-3 rounded-full"><Wind className="h-6 w-6" /></div>
-                <div>
-                  <p className="text-sm text-primary-foreground/70 font-medium">Hawa</p>
-                  <p className="text-xl font-bold">{weather.windSpeed} km/h</p>
-                </div>
-              </div>
-            </div>
+            ))}
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border-none ring-1 ring-border">
-          <CardHeader className="pb-3 border-b border-border bg-muted/20">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <AlertTriangle className="h-5 w-5 text-amber-500" /> Chetavniyaan
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4">
-            {weather.advisories.length > 0 ? (
-              <ul className="space-y-3">
-                {weather.advisories.map((adv, i) => (
-                  <li key={i} className="flex gap-3 text-sm text-foreground/80 items-start">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mt-1.5 shrink-0" />
-                    <span>{adv}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-sm text-muted-foreground text-center py-4">Koi chetavni nahi.</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="shadow-sm border-none ring-1 ring-border md:col-span-2">
-          <CardHeader className="pb-3 border-b border-border bg-muted/20">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Sprout className="h-5 w-5 text-primary" /> Kheti Suzhav
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 grid gap-3 sm:grid-cols-2">
+        {/* Farming Tips */}
+        <Card className="md:col-span-2 border-none shadow-sm ring-1 ring-border overflow-hidden">
+          <div className="flex items-center gap-2.5 px-5 pt-5 pb-3 border-b border-border">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <Sprout className="h-4 w-4 text-primary" />
+            </div>
+            <h3 className="font-bold text-base text-foreground">Kheti Suzhav</h3>
+          </div>
+          <CardContent className="p-4 grid sm:grid-cols-2 gap-3">
             {weather.farmingTips.map((tip, i) => (
-              <div key={i} className="flex gap-3 bg-muted/30 p-3 rounded-lg items-start">
-                <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-sm font-medium text-foreground/90">{tip}</span>
+              <div key={i} className="flex gap-3 bg-primary/5 border border-primary/10 rounded-xl px-3 py-3 items-start group hover:bg-primary/10 transition-colors">
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <span className="text-sm font-semibold text-foreground/90 leading-snug">{tip}</span>
               </div>
             ))}
           </CardContent>
         </Card>
       </div>
 
-      <div className="space-y-4">
-        <h3 className="text-2xl font-bold flex items-center gap-2">
-          <CalendarDays className="h-6 w-6 text-muted-foreground" /> 5 Din Ka Haal
+      {/* 5-Day Forecast */}
+      <div>
+        <h3 className="text-lg font-extrabold text-foreground mb-3 flex items-center gap-2">
+          📅 5 Din Ka Haal
         </h3>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          {weather.forecast.map((day, i) => (
-            <Card key={i} className="shadow-sm border-none ring-1 ring-border bg-card text-center transition-all hover:ring-primary/40">
-              <CardContent className="p-4 flex flex-col items-center justify-center gap-3">
-                <p className="font-semibold text-muted-foreground">{day.date}</p>
-                <div className="bg-muted p-3 rounded-full text-primary">
-                  {day.condition.toLowerCase().includes("baarish") ? <CloudRain className="h-8 w-8" /> : <ThermometerSun className="h-8 w-8" />}
+        <div className="grid grid-cols-5 gap-3">
+          {weather.forecast.map((day, i) => {
+            const isToday = i === 0;
+            return (
+              <div key={i} className={`relative overflow-hidden rounded-2xl p-4 flex flex-col items-center gap-2.5 transition-all card-hover cursor-default text-center
+                ${isToday
+                  ? "bg-gradient-to-b from-primary to-primary/80 text-primary-foreground shadow-lg"
+                  : "bg-card ring-1 ring-border"}`}>
+                {isToday && (
+                  <div className="absolute inset-0 opacity-10"
+                    style={{ backgroundImage: "radial-gradient(circle, white 1px, transparent 1px)", backgroundSize: "12px 12px" }} />
+                )}
+                <p className={`text-[11px] font-extrabold uppercase tracking-wider ${isToday ? "text-primary-foreground/80" : "text-muted-foreground"}`}>
+                  {day.date}
+                </p>
+                <div className={`p-2.5 rounded-xl ${isToday ? "bg-white/20" : "bg-muted"}`}>
+                  <div className={isToday ? "text-primary-foreground" : "text-primary"}>
+                    {getWeatherIcon(day.condition, "h-6 w-6")}
+                  </div>
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-foreground">{day.tempMax}°</p>
-                  <p className="text-sm font-medium text-muted-foreground">{day.tempMin}°</p>
+                  <p className={`text-xl font-black ${isToday ? "text-primary-foreground" : "text-foreground"}`}>{day.tempMax}°</p>
+                  <p className={`text-xs font-bold ${isToday ? "text-primary-foreground/60" : "text-muted-foreground"}`}>{day.tempMin}°</p>
                 </div>
-                <p className="text-xs font-medium text-primary line-clamp-1">{day.condition}</p>
-              </CardContent>
-            </Card>
-          ))}
+                <p className={`text-[10px] font-bold leading-tight ${isToday ? "text-primary-foreground/80" : "text-primary"}`}>
+                  {day.condition}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

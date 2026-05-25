@@ -36,7 +36,7 @@ export default function Chatbot() {
 
   const { data: activeConversation } = useGetConversation(
     activeId!,
-    { query: { enabled: !!activeId } }
+    { query: { enabled: !!activeId, queryKey: getListConversationsQueryKey() } }
   );
 
   const createMutation = useCreateConversation({
